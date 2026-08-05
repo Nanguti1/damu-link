@@ -15,8 +15,8 @@ class CreateDonationClaimAction
     public function execute(BloodAppeal $appeal, DonorRegistry $donor): DonationClaim
     {
         return DB::transaction(function () use ($appeal, $donor) {
-            $appeal = $appeal->lockForUpdate();
-            $donor = $donor->lockForUpdate();
+            $appeal = BloodAppeal::query()->whereKey($appeal)->lockForUpdate()->firstOrFail();
+            $donor = DonorRegistry::query()->whereKey($donor)->lockForUpdate()->firstOrFail();
 
             if ($appeal->status !== 'verified') {
                 throw new InvalidDonationClaimException('Appeal must be verified to create a donation claim.');

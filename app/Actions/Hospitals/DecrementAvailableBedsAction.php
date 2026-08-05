@@ -11,7 +11,7 @@ class DecrementAvailableBedsAction
     public function execute(Hospital $hospital, int $decrement): Hospital
     {
         return DB::transaction(function () use ($hospital, $decrement) {
-            $hospital = $hospital->lockForUpdate();
+            $hospital = Hospital::query()->whereKey($hospital)->lockForUpdate()->firstOrFail();
 
             $newAvailable = $hospital->available_icu_beds - $decrement;
 

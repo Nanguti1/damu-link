@@ -16,11 +16,11 @@ class RegisterDonorRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'user_id' => ['nullable', 'exists:users,id', 'unique:donor_registry,user_id'],
             'phone_number' => ['nullable', 'string', 'max:20', 'unique:donor_registry,phone_number'],
-            'blood_type' => ['required', 'enum', Rule::in(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
+            'blood_type' => ['required', Rule::in(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])],
             'county' => ['required', 'string', 'max:100'],
             'sub_county' => ['required', 'string', 'max:100'],
+            'consent' => ['accepted'],
         ];
     }
 

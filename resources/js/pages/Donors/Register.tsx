@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Link } from '@inertiajs/react';
-import { Heart, Shield, Bell, Check, ArrowRight, User, Phone, MapPin, Droplet } from 'lucide-react';
+import React from 'react';
+import { Link, useForm } from '@inertiajs/react';
+import { Heart, Shield, Bell, Check, ArrowRight, User, Phone, MapPin } from 'lucide-react';
 import { BloodType, BLOOD_TYPES, KENYA_COUNTIES } from '@/types';
 import GlassCard from '@/components/Shared/GlassCard';
 import BloodBadge from '@/components/Shared/BloodBadge';
@@ -10,7 +10,7 @@ interface RegisterDonorProps {
 }
 
 export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDonorProps) {
-  const [formData, setFormData] = useState({
+  const { data, setData, post, processing, errors } = useForm({
     phone_number: '',
     blood_type: '' as BloodType | '',
     county: '',
@@ -18,41 +18,9 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
     consent: false,
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const newErrors: Record<string, string> = {};
-
-    if (!formData.phone_number.trim()) {
-      newErrors.phone_number = 'Phone number is required';
-    }
-
-    if (!formData.blood_type) {
-      newErrors.blood_type = 'Blood type is required';
-    }
-
-    if (!formData.county) {
-      newErrors.county = 'County is required';
-    }
-
-    if (!formData.sub_county) {
-      newErrors.sub_county = 'Sub-county is required';
-    }
-
-    if (!formData.consent) {
-      newErrors.consent = 'You must agree to the terms';
-    }
-
-    setErrors(newErrors);
-
-    if (Object.keys(newErrors).length === 0) {
-      setIsSubmitting(true);
-      // Form submission would happen here via Inertia
-      console.log('Form submitted:', formData);
-      setTimeout(() => setIsSubmitting(false), 2000);
-    }
+    post('/donors');
   };
 
   return (
@@ -90,8 +58,8 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
                     <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                     <input
                       type="tel"
-                      value={formData.phone_number}
-                      onChange={(e) => setFormData({ ...formData, phone_number: e.target.value })}
+                      value={data.phone_number}
+                      onChange={(e) => setData('phone_number', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 dark:text-slate-100"
                       placeholder="+254 700 000 000"
                     />
@@ -110,9 +78,9 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
                       <button
                         key={type}
                         type="button"
-                        onClick={() => setFormData({ ...formData, blood_type: type })}
+                        onClick={() => setData('blood_type', type)}
                         className={`p-3 rounded-xl border-2 transition-all ${
-                          formData.blood_type === type
+                          data.blood_type === type
                             ? 'border-rose-500 bg-rose-50 dark:bg-rose-900/20'
                             : 'border-slate-200 dark:border-slate-800 hover:border-rose-300 dark:hover:border-rose-700'
                         }`}
@@ -134,8 +102,8 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
                     <div className="relative">
                       <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
                       <select
-                        value={formData.county}
-                        onChange={(e) => setFormData({ ...formData, county: e.target.value, sub_county: '' })}
+                        value={data.county}
+                        onChange={(e) => setData({ ...data, county: e.target.value, sub_county: '' })}
                         className="w-full pl-10 pr-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 dark:text-slate-100 appearance-none cursor-pointer"
                       >
                         <option value="">Select county</option>
@@ -157,8 +125,8 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
                     </label>
                     <input
                       type="text"
-                      value={formData.sub_county}
-                      onChange={(e) => setFormData({ ...formData, sub_county: e.target.value })}
+                      value={data.sub_county}
+                      onChange={(e) => setData('sub_county', e.target.value)}
                       className="w-full px-4 py-3 bg-white/50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800 rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 transition-all text-slate-900 dark:text-slate-100"
                       placeholder="Enter sub-county"
                     />
@@ -172,8 +140,8 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
                   <input
                     type="checkbox"
                     id="consent"
-                    checked={formData.consent}
-                    onChange={(e) => setFormData({ ...formData, consent: e.target.checked })}
+                    checked={data.consent}
+                    onChange={(e) => setData('consent', e.target.checked)}
                     className="mt-1 h-4 w-4 text-rose-600 rounded border-slate-300 focus:ring-rose-500"
                   />
                   <label htmlFor="consent" className="text-sm text-slate-600 dark:text-slate-400">
@@ -186,10 +154,10 @@ export default function RegisterDonor({ counties = KENYA_COUNTIES }: RegisterDon
 
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={processing}
                   className="w-full px-8 py-4 bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-rose-500/25 transition-all font-semibold text-lg flex items-center justify-center space-x-2 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? (
+                  {processing ? (
                     <>
                       <div className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                       <span>Registering...</span>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from '@inertiajs/react';
+import { Link, useForm } from '@inertiajs/react';
 import { ArrowLeft, MapPin, Phone, Clock, Droplet, ShieldCheck, AlertTriangle } from 'lucide-react';
 import { BloodAppeal } from '@/types';
 import GlassCard from '@/components/Shared/GlassCard';
@@ -14,6 +14,8 @@ interface ShowAppealProps {
 }
 
 export default function ShowAppeal({ appeal }: ShowAppealProps) {
+  const { post, processing } = useForm({});
+  const claimAppeal = () => post(`/appeals/${appeal.id}/claims`);
   const isUrgent = appeal.status === 'verified' && appeal.pints_secured < appeal.pints_required;
   const timeAgo = new Date(appeal.created_at).toLocaleString();
   const remainingPints = appeal.pints_required - appeal.pints_secured;
@@ -126,12 +128,14 @@ export default function ShowAppeal({ appeal }: ShowAppealProps) {
               </h2>
               {appeal.status === 'verified' && appeal.pints_secured < appeal.pints_required ? (
                 <div className="space-y-3">
-                  <Link
-                    href={`/donation-claims/create?appeal_id=${appeal.id}`}
-                    className="w-full px-6 py-4 bg-gradient-to-r from-rose-600 to-rose-700 dark:from-rose-500 dark:to-rose-600 text-white rounded-xl hover:shadow-lg hover:shadow-rose-500/25 transition-all font-semibold text-center block"
+                  <button
+                    type="button"
+                    onClick={claimAppeal}
+                    disabled={processing}
+                    className="block w-full rounded-xl bg-gradient-to-r from-rose-600 to-rose-700 px-6 py-4 text-center font-semibold text-white transition-all hover:shadow-lg hover:shadow-rose-500/25 disabled:opacity-60 dark:from-rose-500 dark:to-rose-600"
                   >
-                    Claim a Pint
-                  </Link>
+                    {processing ? 'Reserving…' : 'Claim a Pint'}
+                  </button>
                   <button className="w-full px-6 py-4 bg-green-100 dark:bg-green-900/20 text-green-700 dark:text-green-500 rounded-xl hover:bg-green-200 dark:hover:bg-green-900/30 transition-all font-semibold flex items-center justify-center space-x-2">
                     <span>Share on WhatsApp</span>
                   </button>
