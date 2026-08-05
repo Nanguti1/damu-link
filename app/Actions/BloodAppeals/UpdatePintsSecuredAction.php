@@ -10,7 +10,7 @@ class UpdatePintsSecuredAction
     public function execute(BloodAppeal $appeal, int $additionalPints): BloodAppeal
     {
         return DB::transaction(function () use ($appeal, $additionalPints) {
-            $appeal = $appeal->lockForUpdate();
+            $appeal = BloodAppeal::query()->whereKey($appeal)->lockForUpdate()->firstOrFail();
 
             $newTotal = $appeal->pints_secured + $additionalPints;
 

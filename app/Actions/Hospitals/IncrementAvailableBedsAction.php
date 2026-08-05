@@ -11,7 +11,7 @@ class IncrementAvailableBedsAction
     public function execute(Hospital $hospital, int $increment): Hospital
     {
         return DB::transaction(function () use ($hospital, $increment) {
-            $hospital = $hospital->lockForUpdate();
+            $hospital = Hospital::query()->whereKey($hospital)->lockForUpdate()->firstOrFail();
 
             $newAvailable = $hospital->available_icu_beds + $increment;
 

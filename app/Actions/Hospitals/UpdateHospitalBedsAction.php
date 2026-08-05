@@ -11,7 +11,7 @@ class UpdateHospitalBedsAction
     public function execute(Hospital $hospital, int $totalBeds, int $availableBeds): Hospital
     {
         return DB::transaction(function () use ($hospital, $totalBeds, $availableBeds) {
-            $hospital = $hospital->lockForUpdate();
+            $hospital = Hospital::query()->whereKey($hospital)->lockForUpdate()->firstOrFail();
 
             if ($availableBeds > $totalBeds) {
                 throw new HospitalCapacityException('Available ICU beds cannot exceed total ICU beds.');
